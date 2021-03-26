@@ -1,0 +1,9 @@
+/* Master layout */
+body {
+  color: red;
+  margin: 0;
+  padding: 0; }
+
+/* Components */
+.c-dummy {
+  background-color: yellow; }

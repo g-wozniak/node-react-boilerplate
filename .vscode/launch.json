@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "(Linux with nvm) launch and debug",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "runtimeExecutable": "${env:NVM_BIN}/npm",
+      "runtimeArgs": ["run-script", "server"],
+      "cwd": "${workspaceRoot}",
+      "env": {},
+      "restart": true,
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    }
+  ]
+}

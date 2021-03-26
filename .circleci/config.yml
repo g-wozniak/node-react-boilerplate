@@ -1,0 +1,75 @@
+main_only: &main_only
+  filters:
+    branches:
+      only: main
+
+branch_only: &branch_only
+  filters:
+    branches:
+      ignore: main
+
+version: 2.1
+orbs:
+  heroku: circleci/heroku@1.2.3
+jobs:
+  tests:
+    description: Api and web application tests
+    docker:
+      - image: cyberforceit/ci-node-automation:1.0.0
+    steps:
+      - checkout
+      - run:
+          name: 'Install packages'
+          command: npm ci
+      - run:
+          name: 'Build application (dev)'
+          command: npm run ci:webapp
+      - run:
+          name: 'Unit tests'
+          command: npm run ci:test:unit
+      - run:
+          name: 'End-End tests'
+          command: npm run ci:test:browser
+  deployToProd:
+    description: Deploy
+    docker:
+      - image: circleci/node:12
+    steps:
+      - checkout
+      - run:
+          name: 'Install dependencies and build the application'
+          command: |
+            npm ci
+            chmod 744 build.sh
+            ./build.sh
+      - run:
+          name: 'Compress artifact'
+          command: |
+            tar -czvf dist.tar.gz dist
+      - store_artifacts:
+          path: dist.tar.gz
+      - run:
+          name: 'Install Heroku'
+          command: |
+            curl https://cli-assets.heroku.com/install.sh | sh
+      - setup_remote_docker:
+          version: 19.03.13
+      - run:
+          name: 'Deploy container to Heroku production'
+          command: |
+            heroku container:login
+            docker login --username=$HEROKU_USER_EMAIL --password=$HEROKU_API_KEY registry.heroku.com
+            docker build --rm=false -t registry.heroku.com/$HEROKU_APP_PROD_NAME/web dist
+            docker push registry.heroku.com/$HEROKU_APP_PROD_NAME/web:latest          
+            heroku container:release -a $HEROKU_APP_PROD_NAME web
+
+workflows:
+  ci-test-deploy:
+    jobs:
+      - tests:
+          <<: *branch_only
+          name: Application testing
+      - deployToProd:
+          <<: *main_only
+          name: Deploying to production
+          context: production
