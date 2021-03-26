@@ -1,6 +1,6 @@
 {
   "name": "react-boilerplate",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Monorepo boilerplate for new applications. Jest, testcafe, testing library",
   "main": "src/app.ts",
   "scripts": {
